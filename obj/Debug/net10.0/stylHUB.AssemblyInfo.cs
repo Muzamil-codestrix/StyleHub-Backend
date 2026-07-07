@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("stylHUB")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b08a87d6d18dd49b731d868b2eac110e14ff392")]
 [assembly: System.Reflection.AssemblyProductAttribute("stylHUB")]
 [assembly: System.Reflection.AssemblyTitleAttribute("stylHUB")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

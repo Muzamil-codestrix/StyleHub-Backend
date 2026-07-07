@@ -1,15 +1,45 @@
-using stylHUB.Data_layer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using stylHUB.Data_layer;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =====================================================
-// Add Controller Services
-// =====================================================
 builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "My API",
+        Version = "v1",
+        Description = "ASP.NET Core Web API with JWT Authentication"
+    });
+
+    const string schemeId = "Bearer";
+
+    options.AddSecurityDefinition(schemeId, new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Enter JWT token.\nExample: Bearer eyJhbGciOiJIUzI1NiIs...",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference(schemeId, document),
+            new List<string>()
+        }
+    });
+});
 
 // =====================================================
 // CORS CONFIGURATION
@@ -20,9 +50,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // React URL
-              .AllowAnyHeader()                     // Allow headers like Authorization
-              .AllowAnyMethod();                    // Allow GET, POST, PUT, DELETE, etc.
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -44,39 +74,28 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 // Configure Authentication Service
 builder.Services.AddAuthentication(options =>
 {
-    // Default authentication scheme
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-
-    // Default challenge scheme
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // Validate Issuer
         ValidateIssuer = true,
-
-        // Validate Audience
         ValidateAudience = true,
-
-        // Validate Token Expiration
         ValidateLifetime = true,
-
-        // Validate Signing Key
         ValidateIssuerSigningKey = true,
-
-        // Issuer from appsettings.json
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-        // Audience from appsettings.json
         ValidAudience = builder.Configuration["Jwt:Audience"],
-
-        // Secret Key
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtKey))
     };
 });
+
+// =====================================================
+// AUTHORIZATION
+// =====================================================
+builder.Services.AddAuthorization();
 
 // =====================================================
 // Build Application
@@ -84,24 +103,24 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 // =====================================================
+// SWAGGER MIDDLEWARE
+// =====================================================
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
+    options.RoutePrefix = string.Empty;
+});
+
+// =====================================================
 // Middleware Pipeline
 // =====================================================
 
-// Redirect HTTP to HTTPS
 app.UseHttpsRedirection();
-
-// Enable CORS
-// This must come BEFORE Authentication and Authorization
 app.UseCors("ReactPolicy");
-
-// Enable JWT Authentication
 app.UseAuthentication();
-
-// Enable Authorization
 app.UseAuthorization();
-
-// Map Controller Endpoints
 app.MapControllers();
 
-// Run Application
 app.Run();

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using stylHUB.Data_layer;
 
@@ -10,9 +11,11 @@ using stylHUB.Data_layer;
 namespace stylHUB.Migrations
 {
     [DbContext(typeof(App_DB_Context))]
-    partial class App_DB_ContextModelSnapshot : ModelSnapshot
+    [Migration("20260707222855_UpdateDatabase")]
+    partial class UpdateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
